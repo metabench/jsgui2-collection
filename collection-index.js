@@ -9,10 +9,15 @@ define(["./jsgui-lang-essentials", "./jsgui-data-structures", "./data-object", "
 
 */
 
-var jsgui = require('./jsgui-lang-essentials');
-var Data_Structures = require('./jsgui-data-structures');
+var jsgui = require('jsgui2-essentials');
+//var Data_Structures = require('./jsgui-data-structures');
 var Data_Object = require('jsgui2-data-object');
-var Constraint = require('jsgui2-constraint');
+//var Constraint = require('jsgui2-constraint');
+
+var Sorted_KVS = require('jsgui2-sorted-kvs');
+
+
+var Constraint = Data_Object.Constraint;
 
 	// Collection... use sligntly more than essentials?
 	// Likely to use the Data_Object class here.
@@ -68,7 +73,7 @@ var Constraint = require('jsgui2-constraint');
 	var is_arr_of_strs = j.is_arr_of_strs;
 	var is_arr_of_arrs = j.is_arr_of_arrs;
 	 
-	var Sorted_KVS = Data_Structures.Sorted_KVS;
+	//var Sorted_KVS = Data_Structures.Sorted_KVS;
 	var dobj = Data_Object.dobj;
 	
 	var input_processors = j.input_processors;
@@ -178,12 +183,13 @@ var Constraint = require('jsgui2-constraint');
 
 	// Ordered_Dict?
 
-	var BPD_Collection_Index = Collection_Index.extend({
-		'init' : function(spec) {
+	class BPD_Collection_Index extends Collection_Index{
+		'constructor'(spec) {
 			// indexed with both the b+ tree and the dict.
+			super(spec);
 
 		}
-	})
+	}
 
 	// Ordered collection index
 
@@ -248,7 +254,7 @@ var Constraint = require('jsgui2-constraint');
 
 	class Ordered_Collection_Index extends Collection_Index{
 		'constructor'(spec) {
-			this._super(spec);
+			super(spec);
 			// which field(s) get indexed?
 			//this.fields = spec.fields;
 			this.index_type = 'ordered';
@@ -412,9 +418,9 @@ var Constraint = require('jsgui2-constraint');
 
 	
 	
-	var Sorted_Collection_Index = Collection_Index.extend({
-		'init': function(spec) {
-			this._super(spec);
+	class Sorted_Collection_Index extends Collection_Index {
+		'constructor'(spec) {
+			super(spec);
 			
 			//this.fields = spec.fields;
 			
@@ -433,11 +439,10 @@ var Constraint = require('jsgui2-constraint');
 			
 			this.sorted_kvs = new Sorted_KVS(12);
 			
-		},
-		'each': function(callback) {
+		}
+		'each'(callback) {
 			return this.sorted_kvs.each(callback);
-		},
-		
+		}
 		// this is not a constraint.
 		
 		/*
@@ -470,7 +475,7 @@ var Constraint = require('jsgui2-constraint');
 		},
 		*/
 		
-		'unsafe_add_object': function(obj) {
+		'unsafe_add_object'(obj) {
 			
 			// if the object is just a string?
 			//  object needs to be in a data_object though.
@@ -509,12 +514,14 @@ var Constraint = require('jsgui2-constraint');
 			this.sorted_kvs.put(fields_key, obj);
 			// so far, so good.
 
-		},
+		}
 		
 		// get for one object?
 		//  or find? Want flexibility where possible, so may provide arrays.
 		
-		'get': fp(function(a, sig) {
+		'get'(a, sig) {
+
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			//console.log('Sorted_Collection_Index get');
 			// will be providing a key, or part of a key
 			//  uses the prefix search.
@@ -540,13 +547,14 @@ var Constraint = require('jsgui2-constraint');
 				return kvps;
 			}
 			
-		}),
-		'has': fp(function(a, sig) {
+		}
+		'has'(a, sig) {
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			if (sig == '[s]') {
 				return (this.sorted_kvs.key_count() > 0);
 			}
-		}),
-		'remove': function(obj) {
+		}
+		'remove'(obj) {
 			// depends on what type of object the collection is holding too.
 			//  When initialized as Collection(String).
 			//   Has a collection data type constraint.
@@ -564,12 +572,12 @@ var Constraint = require('jsgui2-constraint');
 		}
 		
 		// when getting... do we have the fields?
-	});
+	}
 	
 	// Map rather than dict?
-	var Dict_Collection_Index = Collection_Index.extend({
-		'init': function(spec) {
-			this._super(spec);
+	class Dict_Collection_Index extends Collection_Index {
+		'constructor'(spec) {
+			super(spec);
 			// which field(s) get indexed?
 			//this.fields = spec.fields;
 			this.index_type = 'dict';
@@ -581,9 +589,9 @@ var Constraint = require('jsgui2-constraint');
 			// perhaps the Dict_Collection_Index could operate in unique_mode =
 			// false as well.
 			this.unique_mode = true;
-		},
+		}
 
-		'can_add_object' : function(obj) {
+		'can_add_object'(obj) {
 			// true / false?
 			// won't have the error message.
 			// perhaps another function could reveal the problem if asked.
@@ -613,9 +621,9 @@ var Constraint = require('jsgui2-constraint');
 				}
 			}
 			return true;
-		},
+		}
 
-		'unsafe_add_object' : (function(obj) {
+		'unsafe_add_object'(obj) {
 
             //console.log('Dict_Collection_Index unsafe_add_object');
 			//console.log('DICT unsafe_add_object');
@@ -637,8 +645,9 @@ var Constraint = require('jsgui2-constraint');
 			// get the fields key from the field values.
 			// this.dict[fields_key]
 
-		}),
-		'get': fp(function(a, sig) {
+		}
+		'get'(a, sig) {
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			// [s]
 			// just one value, searching the index based on that value.
 			
@@ -651,12 +660,12 @@ var Constraint = require('jsgui2-constraint');
 			}
 			// array of values - will need to group them together and search the
 			// index.
-		})
+		}
 
 	// some kind of search or retrieval function.
 	// 'get' I think for this index.
 
-	})
+	}
 
 	// A whole system for collection indexes.
 	// Maybe it should be in the collection class?
@@ -732,14 +741,14 @@ var Constraint = require('jsgui2-constraint');
 	
 	// Maybe don't create the index system if there is nothing to do.
 
-	var Collection_Index_System = Class.extend({
+	class Collection_Index_System {
 		
 		// I am now going to extend this so that it also can use B+ trees.
 		//  B+ trees may be advantageous to use in many cases over dicts, but will likely be slower and use more memory, though will
 		//  also provide prefix search and ordering functionality in addition to the dict index.
 		
 		
-		'init' : function(spec) {
+		'constructor'(spec) {
 
 			// This could keep track of the primary_unique_index for get
 			// operations.
@@ -880,24 +889,24 @@ var Constraint = require('jsgui2-constraint');
 			//  may require searching at times.
 			
 			
-		},
+		}
 
 		// respond to events in the DataObjects / values stored within the collection.
 		//  the normal system of propagating events up to the parents / ancestors?
 		//  
 
-		'notify_insertion': function(pos) {
+		'notify_insertion'(pos) {
 			// need to code this.
 			//  don't think its relevant for controls, which is what I'm working on right now.
 
 			//console.log('TODO collection-index notify_insertion');
 			return false;
-		},
+		}
 		
 		
-		'clear' : function() {
+		'clear'() {
 			this.index_map = {};
-		},
+		}
 
 		// re-index a whole collection / array...
 
@@ -979,7 +988,8 @@ var Constraint = require('jsgui2-constraint');
 		
 		
 		
-		'search_for_index_with_fields': fp(function(a, sig) {
+		'search_for_index_with_fields'(a, sig) {
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			// will be consulting the alphabetical list of fields.
 			//  also, index could be indexed with its alphabetical list of fields.
 			
@@ -1032,8 +1042,6 @@ var Constraint = require('jsgui2-constraint');
 				var matching_count = 0;
 
 				this.iterate_indexes(function(index, stop) {
-				
-					
 					
 					//console.log('iterate_indexes index ' + index);
 					//console.log('iterate_indexes index.fields ' + stringify(index.fields));
@@ -1072,18 +1080,14 @@ var Constraint = require('jsgui2-constraint');
 
 					}
 				}
-
 			}
-			
-			
-			
-			
-		}),
+		}
 		
 		
 		// calling this find now.
 		//  shorter, more positive sounding.
-		'find': fp(function(a, sig) {
+		'find'(a, sig) {
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			
 			// we can't really do search at the moment.
 			//  21/06/2012, now we can. Good B+ implementation now in there.
@@ -1539,7 +1543,7 @@ var Constraint = require('jsgui2-constraint');
 				//console.log('res ' + stringify(res));
 				return res;
 			}
-		}),
+		}
 
 		// This is going to be replaced with the system of constraints.
 		//  There is the index
@@ -1605,7 +1609,7 @@ var Constraint = require('jsgui2-constraint');
 		*/
 		
 		
-		'get_index_starting': function(fields) {
+		'get_index_starting'(fields) {
 			// will be starting with just one field?...
 			//  get indexes starting...
 			
@@ -1665,10 +1669,11 @@ var Constraint = require('jsgui2-constraint');
 			}
 			
 			
-		},
+		}
 		
 		
-		'ensure_index': fp(function(a, sig) {
+		'ensure_index'(a, sig) {
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			// index may be given as the field(s)
 			// single string field, or an array of fields.
 
@@ -1888,7 +1893,7 @@ var Constraint = require('jsgui2-constraint');
 					}
 				}
 			}
-		}),
+		}
 
 
 
@@ -1896,7 +1901,7 @@ var Constraint = require('jsgui2-constraint');
 		// by field, then by index type.
 		//  Would be good to have a clearer name / description of this function.
 
-		'set_index_by_type_by_fields': function(index, arr_fields, index_type) {
+		'set_index_by_type_by_fields'(index, arr_fields, index_type) {
 			// In the Collection_Index_System
 
 			//console.log('set_index_by_type_by_fields');
@@ -2011,14 +2016,14 @@ var Constraint = require('jsgui2-constraint');
 			}
 			i['indexes_by_type'] = i['indexes_by_type'] || {};
 			i['indexes_by_type'][index_type] = index;
-		},
+		}
 		
 		// may just be called index() in the collection, but more in-depth name here.
-		'set_index' : function(index) {
+		'set_index'(index) {
 			this.set_index_by_type_by_fields(index, index.fields, index.index_type);
-		},
+		}
 
-		'get_index_by_type_by_fields': function(arr_fields, index_type) {
+		'get_index_by_type_by_fields'(arr_fields, index_type) {
 			// needs to go through the fields, moving through the
 			// indexes.
 			var c = 0, l = arr_fields.length;
@@ -2041,9 +2046,10 @@ var Constraint = require('jsgui2-constraint');
 
 			return index;
 
-		},
+		}
 		
-		'indexes': fp(function(a, sig) {
+		'indexes'(a, sig) {
+			var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
 			if (a.l == 0) {
 				var res = [];
 				this.iterate_indexes(function(index) {
@@ -2053,10 +2059,10 @@ var Constraint = require('jsgui2-constraint');
 			} else {
 				throw 'Setting indexes not supported here (yet)';
 			}
-		}),
+		}
 
 		// with 'stop' function in callback
-		'iterate_indexes': function(index_callback) {
+		'iterate_indexes'(index_callback) {
 
 			//console.log('ii');
 			
@@ -2112,75 +2118,13 @@ var Constraint = require('jsgui2-constraint');
 			//console.log('this.index_map ' + stringify(this.index_map));
 			iterate_level(this.index_map);
 
-		},
+		}
 
 		// this will be checking it against constraints instead.
 		/// depricated... will be removed.
-		'_____can_add_object': function(obj) {
-			// think we just check for single objects right now
 
-			var tobj = tof(obj);
-			//console.log('can_add_object tobj ' + tobj);
 
-			if (tobj == 'data_object') {
-				// go through the indexes to see if all the indexes can
-				// add it.
-				
-				// does it match the acceptance criteria?
-				/*
-				if (this._accepts) {
-					// check whether the obj matches this._accepts
-					
-					// ._accepts as constraints / a Data_Object as constraints?
-					//  a Data_Object with its fields set as constraints?
-					//  or would the fields be fine by themselves?
-					
-					// want a function to test a Data_Object against fields
-					
-					// the indexing system does not do the acceptance test for data validation, only checking it's not conflicting.
-					
-					console.log('this._accepts ' + this._accepts);
-					
-					
-				}
-				*/
-				
-				var can_add = true;
-
-				this.iterate_indexes(function(index) {
-					// a problem iterating the indexes.
-
-					//console.log('*ii index ' + stringify(index));
-
-					// when adding an object to an index, it could raise
-					// an error.
-					// may be best to check all indexes first to see if
-					// the object will be addable.
-
-					// index.add_object(obj);
-
-					var index_can_add = index.can_add_object(obj);
-
-					//console.log('index_can_add ' + index_can_add);
-
-					if (!index_can_add) {
-						can_add = false;
-						// break from iteration, like is possible in
-						// jQuery?
-					}
-
-				});
-
-				return can_add;
-
-			} else {
-				return false;
-				
-			}
-
-		},
-
-		'add_object': function(obj) {
+		'add_object'(obj) {
 			console.log('Index System add_object ' + stringify(obj));
 			return this.unsafe_add_object(obj);
 			/*
@@ -2191,13 +2135,13 @@ var Constraint = require('jsgui2-constraint');
 				throw 'Can\'t add object. Check unique key collisions.';
 			}
 			*/
-		},
+		}
 
 		
 		// The index no longer will have a problem with multiple items with the same key being added.
 		//  It's the uniqueness constraints which may have something to say about it. They would consult the indexes.
 		
-		'unsafe_add_object': function(obj) {
+		'unsafe_add_object'(obj) {
 
             //console.log('Collection_Index_System unsafe_add_object');
 			// NOT adds an index.
@@ -2230,10 +2174,10 @@ var Constraint = require('jsgui2-constraint');
 				index.unsafe_add_object(obj);
 			});
 
-		},
+		}
 		
 		
-		'remove': function(obj) {
+		'remove'(obj) {
 			// was remove_object
 			
 			// need to locate the object.
@@ -2246,9 +2190,9 @@ var Constraint = require('jsgui2-constraint');
 				
 			});
 			// remove it from the sorted_kvs.
-		},
+		}
 		// This is going to be changed to collection_constraints
-		'accepts': fp(function(a, sig) {
+		'accepts'(a, sig) {
 			// may be expressed in terms of a Data_Object
 			if (sig == '[D]') {
 				// we set the acceptance criteria to the Data_Object. Every object that gets potentially added to this gets checked against
@@ -2263,7 +2207,7 @@ var Constraint = require('jsgui2-constraint');
 				throw 'Map object as acceptance criteria not yet supported in Collection';
 				
 			}
-		})
+		}
 		
 		/*
 		'clear' : function() {
@@ -2276,12 +2220,14 @@ var Constraint = require('jsgui2-constraint');
 
 	// ensure index by type and rows.
 
-	});
-
-	var Collection_Index = {
-		'System': Collection_Index_System,
-		'Sorted': Sorted_Collection_Index
 	}
+
+	//var Collection_Index = {
+	//	'System': Collection_Index_System,
+	//	'Sorted': Sorted_Collection_Index
+	//}
+Collection_Index.System = Collection_Index_System;
+Collection_Index.Sorted = Sorted_Collection_Index;
 
 	//return Collection_Index;
 module.exports = Collection_Index;

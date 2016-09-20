@@ -9,8 +9,8 @@
  */
 
 var jsgui = require('jsgui2-essentials');
-var Data_Structures = require('./jsgui-data-structures');
-var Data_Value = require('.jsgui2-data-value');
+//var Data_Structures = require('./jsgui-data-structures');
+var Data_Value = require('jsgui2-data-value');
 var Data_Object = require('jsgui2-data-object');
 var Data_Object_Field_Collection = Data_Object.Fields_Collection;
 //var Constraint = require('./constraint');
@@ -57,7 +57,7 @@ var get_a_sig = j.get_a_sig;
 var is_arr_of_strs = j.is_arr_of_strs;
 var is_arr_of_arrs = j.is_arr_of_arrs;
 
-var Sorted_KVS = Data_Structures.Sorted_KVS;
+var Sorted_KVS = require('jsgui2-sorted-kvs');
 var dobj = Data_Object.dobj;
 
 var input_processors = j.input_processors;
@@ -294,7 +294,7 @@ class Collection extends Data_Object{
 
             }
         }
-        super(spec);
+        super(spec);;
     }
 
     // maybe use fp, and otherwise apply with the same params and context.
@@ -328,7 +328,7 @@ class Collection extends Data_Object{
                 // need to reindex - though could have optimization that checks to see if the indexes are the same...
                 throw 'stop';
                 this.clear();
-                value.each(function(i, v) {
+                value.each(function(v, i) {
                     that.push(v);
                 })
 
@@ -378,7 +378,7 @@ class Collection extends Data_Object{
             //console.log('obj._arr ' + stringify(obj._arr));
 
             var first = true;
-            this.each(function(i, v) {
+            this.each(function(v, i) {
                 if (!first) {
                     res.push(', ');
                 } else {
@@ -400,7 +400,7 @@ class Collection extends Data_Object{
 
     'toObject'() {
         var res = [];
-        this.each(function(i, v) {
+        this.each(function(v, i) {
             res.push(v.toObject());
         });
         return res;
@@ -1694,7 +1694,7 @@ class Collection extends Data_Object{
 
     'value'() {
         var res = [];
-        this.each(function(i, v) {
+        this.each(function(v, i) {
             if (typeof v.value == 'function') {
                 //res[i] = v.value();
                 res.push(v.value());

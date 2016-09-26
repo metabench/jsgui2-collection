@@ -76,25 +76,19 @@ class Collection_Data_Def_Constraint extends Collection_Constraint {
 
 
 // Perhaps rename to Collection_Data_Type_Constructor_Constraint
-var Collection_Data_Type_Constraint = Collection_Constraint {
-
-	'init': function (spec) {
-
-		super();
-
+class Collection_Data_Type_Constraint extends Collection_Constraint {
+	'constructor'(spec) {
+		super(spec);
 		//if (tof(spec) == 'function' && is_constructor_fn(spec)) {
 		//	this.data_type_constructor = spec;
 		//}
 		//console.log('tof(spec) ' + tof(spec));
 		//console.log('tof(String) ' + tof(String));
-
 		if (tof(spec) === 'function') {
 			this.data_type_constructor = spec;
 		}
-
 		this._constraint_type = 'data_type';
-
-	},
+	}
 	'match': fp(function (a, sig) {
 		//console.log('');
 		//console.log('*  match sig ' + sig);
@@ -221,8 +215,6 @@ var Collection_Data_Type_Constraint = Collection_Constraint {
 
 //		//console.log('Collection_Data_Object_Constraint tof(spec) ' + tof(spec));
 
-
-
 //		this._constraint_type = 'data_object';
 
 //	},
@@ -265,8 +257,6 @@ var Collection_Data_Type_Constraint = Collection_Constraint {
 //			//console.log('coll_dtc ' + stringify(coll_dtc));
 
 
-
-
 //			var stack = new Error().stack
 //			console.log( stack )
 
@@ -275,28 +265,20 @@ var Collection_Data_Type_Constraint = Collection_Constraint {
 //			*/
 //			return true;
 
-
 //		}
-
 //	})
 
 //});
 
-
-
-
 // One of these can be set to primary. The first one is by default.
 //  The order of the unique indexes matters.
 
-var Unique_Constraint = Collection_Constraint {
+var Unique_Constraint extends Collection_Constraint {
 
-	'init': function (spec) {
+	'constructor': function (spec) {
 		super(spec);
-
 		//this.set('constraint_type', 'unique');
-
 		this._constraint_type = 'unique';
-
 		// field (name) or actual field (reference to a field constraint).
 
 		// but field could be plural too
@@ -308,12 +290,9 @@ var Unique_Constraint = Collection_Constraint {
 			this._sorted_fields = clone(this.fields).sort();
 		}
 	}
-
 	// not really sure the constraint will do much here... it requires an index to be set up.
 	//  perhaps tells the index not to accept duplicates?
 
 	// test the constraint?
 	//  do that outside for the moment
-
-
-});
+}

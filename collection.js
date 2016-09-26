@@ -12,6 +12,7 @@ var jsgui = require('jsgui2-essentials');
 //var Data_Structures = require('./jsgui-data-structures');
 var Data_Value = require('jsgui2-data-value');
 var Data_Object = require('jsgui2-data-object');
+console.log('Data_Object', Data_Object);
 var Data_Object_Field_Collection = Data_Object.Fields_Collection;
 //var Constraint = require('./constraint');
 
@@ -58,14 +59,17 @@ var is_arr_of_strs = j.is_arr_of_strs;
 var is_arr_of_arrs = j.is_arr_of_arrs;
 
 var Sorted_KVS = require('jsgui2-sorted-kvs');
-var dobj = Data_Object.dobj;
+//var dobj = Data_Object;
 
 var input_processors = j.input_processors;
 
-var constraint_from_obj = Constraint.from_obj;
+//var constraint_from_obj = Constraint.from_obj;
+
+
 var native_constructor_tof = jsgui.native_constructor_tof;
 
 var dop = Data_Object.prototype;
+console.log('Data_Object', Data_Object);
 
 // wrap the old set_field function
 var old_set_field = dop.set_field;
@@ -140,6 +144,7 @@ var obj_matches_query_obj = function(obj, query) {
 class Collection extends Data_Object{
 
     'constructor'(spec, arr_values) {
+        super(spec);
         //console.log('Collection init');
         //console.log('spec ' + stringify(spec))
         spec = spec || {};
@@ -294,7 +299,7 @@ class Collection extends Data_Object{
 
             }
         }
-        super(spec);;
+
     }
 
     // maybe use fp, and otherwise apply with the same params and context.
@@ -433,10 +438,8 @@ class Collection extends Data_Object{
         }
     }
 
-
     '_id'() {
         // gets the id.
-
 
         if (this.context) {
             this.__id = this.context.new_id(this.__type_name || this.__type);
@@ -453,9 +456,7 @@ class Collection extends Data_Object{
             }
         }
         return this.__id;
-
     }
-
 
     'length'() {
         return this._arr.length;
@@ -470,12 +471,9 @@ class Collection extends Data_Object{
         //console.log('collection find ' + sig);
         //console.log('a ' + stringify(a));
         if (a.l == 1) {
-
             // Make it so that index_system handles object queries...
             //  field: value
-
             //console.log('this.index_system', this.index_system);
-
             //throw 'stop';
 
             var index_system_find_res = this.index_system.find(a[0]);

@@ -9,7 +9,7 @@
     "type" : "git",
     "url" : "https://github.com/metabench/jsgui2-collection.git"
   },
-  "version": "0.0.2",
+  "version": "0.0.4",
   "dependencies" : {
     "jsgui2-essentials" : ">= 0.0.1",
     "jsgui2-data-value": ">= 0.0.1",

@@ -80,8 +80,8 @@ var Constraint = Data_Object.Constraint;
 	var Data_Value = Data_Object.Data_Value;
 	
 	
-	var constraint_from_obj = Constraint.from_obj;
-	var native_constructor_tof = jsgui.native_constructor_tof;
+	//var constraint_from_obj = Constraint.from_obj;
+	//var native_constructor_tof = jsgui.native_constructor_tof;
 	// Definitiely will help the website to power quite a few things.
 	//  Having a really nice website of my own will definitely help.
 	

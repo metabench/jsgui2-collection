@@ -10,6 +10,7 @@ define(["./jsgui-lang-essentials", "./jsgui-data-structures", "./data-object", "
 */
 
 var jsgui = require('jsgui2-essentials');
+var get_a_sig = jsgui.get_a_sig;
 //var Data_Structures = require('./jsgui-data-structures');
 var Data_Object = require('jsgui2-data-object');
 //var Constraint = require('jsgui2-constraint');

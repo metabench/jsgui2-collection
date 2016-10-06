@@ -12,7 +12,10 @@ var jsgui = require('jsgui2-essentials');
 //var Data_Structures = require('./jsgui-data-structures');
 var Data_Value = require('jsgui2-data-value');
 var Data_Object = require('jsgui2-data-object');
-console.log('Data_Object', Data_Object);
+
+var dobj = Data_Object.dobj;
+
+//console.log('Data_Object', Data_Object);
 var Data_Object_Field_Collection = Data_Object.Fields_Collection;
 //var Constraint = require('./constraint');
 
@@ -69,7 +72,7 @@ var input_processors = j.input_processors;
 var native_constructor_tof = jsgui.native_constructor_tof;
 
 var dop = Data_Object.prototype;
-console.log('Data_Object', Data_Object);
+//console.log('Data_Object', Data_Object);
 
 // wrap the old set_field function
 var old_set_field = dop.set_field;
@@ -1173,6 +1176,7 @@ class Collection extends Data_Object{
 
     'index_by'() {
         var that = this;
+        var a = arguments; a.l = arguments.length; var sig = get_a_sig(a, 1);
         //console.log('index_by a ' + stringify(a));
         //console.log('a.l ' + a.l);
         //console.log('index_by sig ' + sig);
@@ -1380,6 +1384,12 @@ class Collection extends Data_Object{
         //console.log('--------------------')
         //console.log('push tv ' + tv);
 
+        // The jsgui1 code would wrap every object inside a Data_Object.
+        //  That should not be necessary any longer.
+
+
+
+
         if (tv === 'object') {
 
             var dtc = this._data_type_constraint;
@@ -1421,7 +1431,7 @@ class Collection extends Data_Object{
                     //value = new
                     //console.log('* value ' + stringify(value));
                     if (ddc) {
-                        value = dobj(value, ddc.data_def);
+                        //value = dobj(value, ddc.data_def);
                     } else {
 
                         // Some objects, like DOM objects, won't work when put into a data_object or data_value.
@@ -1431,18 +1441,23 @@ class Collection extends Data_Object{
                         //console.log('tof value', tof(value));
                         //console.log('value', value);
 
-                        value = dobj(value);
+                        //value = dobj(value);
+
+
+
                     }
                     //console.log('value ' + stringify(value));
                     // set its constraints...
-                    value.constraints(ddc);
+                    //value.constraints(ddc);
                     // Using the collection data definition constraint, should be able to set the inner constaint of the
                     //  data_object. May just use the same object rather than cloning it.
                 }
 
                 //value = dobj(value);
             }
-            tv = tof(value);
+            //tv = tof(value);
+
+            this._arr.push(value);
             //console.log('tv ' + tv);
             //console.log('value ' + value);
         }

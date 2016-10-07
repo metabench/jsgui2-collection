@@ -111,7 +111,7 @@ var obj_matches_query_obj = function(obj, query) {
     //console.log('query ' + stringify(query));
 
     var matches = true;
-    each(query, function(fieldName, fieldDef) {
+    each(query, function(fieldDef, fieldName) {
         var tfd = tof(fieldDef);
         //console.log('fieldName ' + fieldName);
         //console.log('tfd ' + tfd);
@@ -147,12 +147,21 @@ var obj_matches_query_obj = function(obj, query) {
 class Collection extends Data_Object{
 
     'constructor'(spec, arr_values) {
+        // Has problems setting up the index while it is initialising.
+        //  Can't call set_index.
+
+
+
         super(spec);
+
+
+
         //console.log('Collection init');
         //console.log('spec ' + stringify(spec))
         spec = spec || {};
         // Probably should act differently for an abstract collection.
         this.__type = 'collection';
+        this.__type_name = 'collection';
         var spec = spec || {};
         var t_spec = tof(spec);
         if (spec.abstract === true) {
@@ -300,6 +309,10 @@ class Collection extends Data_Object{
 
             if (!this.__type) {
 
+            }
+
+            if (spec.load_array) {
+                this.load_array(spec.load_array);
             }
         }
 
@@ -471,7 +484,7 @@ class Collection extends Data_Object{
         // var found = coll_presidents.find([['name', 'Franklin Pierce'], ['party', 'Republican']]);
 
         // it can be an array of fields.
-        //console.log('collection find ' + sig);
+        console.log('collection find ' + sig);
         //console.log('a ' + stringify(a));
         if (a.l == 1) {
             // Make it so that index_system handles object queries...
@@ -562,13 +575,24 @@ class Collection extends Data_Object{
             // don't consult the index system.
             var foundItems = [];
             // for each object we need to go deeper into the fields.
-            each(this, function(index, item) {
+            each(this, function(item, index) {
                 //console.log('index ' + index);
                 //console.log('item ' + stringify(item));
 
                 //var matches = item.match(query);
 
-                var itemProperty = item.get(propertyName);
+
+                //var itemProperty = item.get(propertyName);
+
+                if (item.get) {
+                    var itemProperty = item.get(propertyName);
+                } else {
+                    var itemProperty = item[propertyName];
+                }
+
+                //
+
+
                 //console.log('itemProperty ' + stringify(itemProperty));
 
                 //console.log('tof(itemProperty) ' + tof(itemProperty));
@@ -595,9 +619,11 @@ class Collection extends Data_Object{
 
                 //throw 'stop';
 
+                //console.log('query', query);
+
                 if (tip2 === 'array') {
                     // possibly should be a collection
-                    each(ip2, function(i, v) {
+                    each(ip2, function(v, i) {
                         //console.log('v ' + stringify(v));
                         var matches = obj_matches_query_obj(v, query);
                         //console.log('matches ' + matches);
@@ -610,7 +636,15 @@ class Collection extends Data_Object{
                 // check each data item for the match.
                 //throw '!stop';
             })
-            return new Collection(foundItems);
+
+            //console.log('foundItems', foundItems);
+            var res = new Collection(foundItems);
+            //console.log('res', res);
+            //throw 'stop';
+
+
+
+            return res;
         }
     }
     // get seems like the way to get unique values.
@@ -1205,7 +1239,7 @@ class Collection extends Data_Object{
             if (is_arr_of_arrs(a[0])) {
                 // deal with each of them in turn.
                 //console.log('it is_arr_of_arrs');
-                each(a[0], function(i, specified_index) {
+                each(a[0], function(specified_index, i) {
                     that.index(specified_index);
                 });
             }
@@ -1229,9 +1263,9 @@ class Collection extends Data_Object{
             //console.log('object sig');
 
             var index_map = a[0];
-            //console.log('index_map ' + stringify(index_map));
+            console.log('* index_map ' + stringify(index_map));
 
-            each(index_map, function(index_type, index_definition) {
+            each(index_map, function(index_definition, index_type) {
 
                 //console.log('index_definition', index_definition);
                 //console.log('index_type ' + index_type);
@@ -1240,16 +1274,17 @@ class Collection extends Data_Object{
 
                     //if (index_type == 'sorted') {
                     //console.log('index_definition ' + stringify(index_definition));
-                    if (tof(index_definition) == 'array') {
+                    if (tof(index_definition) === 'array') {
                         // is it an array of strings? then it is the fields?
                         // is it an array of arrays?
+                        //console.log('is_arr_of_arrs(index_definition)', is_arr_of_arrs(index_definition));
                         if (is_arr_of_arrs(index_definition)) {
                             // each index, each field in the index
                             var indexes = [];
 
+                            //console.log('pre each');
 
-
-                            each(index_definition, function(i, individual_index_fields) {
+                            each(index_definition, function(individual_index_fields, i) {
                                 // then will have a bunch of fields
                                 //console.log('individual_index_fields ' + stringify(individual_index_fields));
 
@@ -1257,8 +1292,6 @@ class Collection extends Data_Object{
                                 //  need to be careful when the field is an attached object.
                                 //   may use JSON notation for the attachement.
                                 //   likely to disallow quotes and (square) brackets in field names.
-
-
 
                                 // Make it so Sorted_Collection_Index can handle attached objects.
                                 //  fields set like [{"attached": {"meta": "name"}}]
@@ -1270,29 +1303,26 @@ class Collection extends Data_Object{
 
                                 //console.log('individual_index_fields', individual_index_fields);
 
-
                                 var index = new Sorted_Collection_Index({
                                     'fields' : individual_index_fields
                                 });
+
+                                console.log('individual_index_fields', individual_index_fields);
+                                console.log('that', that);
 
                                 // These collection indexes should have a 'get' function.
 
                                 that.index_system.set_index(index);
                                 indexes.push(index);
-
                             });
-
                             //console.log('indexes', indexes);
-
                             that.index_system._primary_unique_index = indexes[0];
                             return indexes[0];
                         }
                         if (is_arr_of_strs(index_definition)) {
                             // one index, with fields
                         }
-
                     }
-
                     //}
                 }
             })
@@ -1458,6 +1488,11 @@ class Collection extends Data_Object{
             //tv = tof(value);
 
             this._arr.push(value);
+            this.index_system.unsafe_add_object(value);
+            this._arr_idx++;
+
+            // add change event?
+
             //console.log('tv ' + tv);
             //console.log('value ' + value);
         }
